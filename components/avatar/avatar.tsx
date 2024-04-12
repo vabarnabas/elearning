@@ -1,10 +1,7 @@
 import clsx from "clsx"
 import React from "react"
-import useSWR from "swr"
 
-import { CURRENT_USER_CACHE } from "@/constants/swr"
-import { immutableOptions } from "@/constants/swr.options"
-import { req } from "@/services/req"
+import UseCurrentUser from "@/hooks/useCurrentUser"
 
 import Spinner from "../spinner/spinner"
 
@@ -23,13 +20,7 @@ interface Props {
 }
 
 export default function Avatar({ invert, disabled, noTooltip, size }: Props) {
-  const { data, isLoading } = useSWR(
-    CURRENT_USER_CACHE,
-    async () => {
-      return await req.getCurrentUser()
-    },
-    { ...immutableOptions }
-  )
+  const { currentUser, isLoading } = UseCurrentUser()
 
   function getInitials(displayName: string) {
     const nameArray = displayName.split(" ")
@@ -53,8 +44,8 @@ export default function Avatar({ invert, disabled, noTooltip, size }: Props) {
         { "cursor-pointer": !noTooltip }
       )}
     >
-      {!isLoading && data?.displayName ? (
-        getInitials(data.displayName)
+      {!isLoading && currentUser?.displayName ? (
+        getInitials(currentUser.displayName)
       ) : (
         <Spinner />
       )}

@@ -20,9 +20,7 @@ export default function Login() {
   const [, setIsLoading] = useState(false)
 
   const form = useForm<FormValues>({ resolver: yupResolver(loginSchema) })
-  const { register, handleSubmit, getValues } = form
-
-  console.log(getValues())
+  const { register, handleSubmit } = form
 
   const onSubmit = handleSubmit(async (data) => {
     setIsLoading(true)
@@ -43,31 +41,34 @@ export default function Login() {
   return (
     <Layout disableNavbar>
       <FormProvider {...form}>
-        <div className="h-full w-full flex flex-col flex-grow items-center justify-center">
-          <form onSubmit={onSubmit} className="flex flex-col gap-y-4 min-w-72">
+        <div className="flex h-full w-full flex-grow flex-col items-center justify-center">
+          <form onSubmit={onSubmit} className="flex min-w-80 flex-col gap-y-4">
             <p className="text-2xl font-bold">
               <span className="text-pink-500">W</span>elcome
             </p>
             <div className="">
-              <p className="text-sm mb-1 font-semibold">E-mail</p>
+              <p className="mb-1 text-sm opacity-60">E-mail</p>
               <input
                 {...register("identifier")}
                 type="text"
                 placeholder="Your E-mail"
-                className="w-full px-3 py-1 border border-[#2c2c2c] flex justify-center items-center rounded-md bg-transparent"
+                className="flex w-full items-center justify-center rounded-md border border-[#2c2c2c] bg-transparent px-3 py-1.5 outline-none"
               />
             </div>
             <div className="">
-              <p className="text-sm mb-1 font-semibold">Password</p>
+              <p className="mb-1 text-sm opacity-60">Password</p>
               <input
                 {...register("password")}
                 type="password"
                 placeholder="Password"
-                className="w-full px-3 py-1 border border-[#2c2c2c] flex justify-center items-center rounded-md bg-transparent"
+                className="flex w-full items-center justify-center rounded-md border border-[#2c2c2c] bg-transparent px-3 py-1.5 outline-none"
               />
             </div>
-            <button className="w-full px-3 py-1 bg-pink-500 hover:bg-pink-600 rounded-md text-white font-semibold">
+            <button className="w-full rounded-md bg-pink-500 px-3 py-1.5 font-semibold text-white hover:bg-pink-600">
               Login
+            </button>
+            <button className="cursor-pointer text-center text-pink-500 hover:text-pink-600">
+              Register
             </button>
           </form>
         </div>

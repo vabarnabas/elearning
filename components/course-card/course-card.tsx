@@ -16,24 +16,24 @@ export default function CourseCard({ course }: Props) {
     <div
       key={course.displayName}
       onClick={() => router.push(`courses/${course.id}`)}
-      className="relative border rounded-md border-[#2c2c2c] bg-[#171a1d] p-3 justify-between flex flex-col h-56 cursor-pointer"
+      className="relative flex h-56 cursor-pointer flex-col justify-between rounded-md border border-[#2c2c2c] bg-[#171a1d] p-3"
     >
       <Image
-        className="opacity-30 rounded-md"
+        className="rounded-md opacity-30"
         src={course.imageUrl}
         objectFit="cover"
         fill
         alt="asd"
       />
-      <div className="w-full flex justify-between z-10">
+      <div className="z-10 flex w-full justify-between">
         <div className="flex gap-x-1.5">
           {course.iconUrls.map((icon) => (
             <div
               key={icon}
-              className="border border-[#2c2c2c] aspect-square w-8 flex justify-center items-center rounded-md bg-[#171a1d]"
+              className="flex aspect-square w-8 items-center justify-center rounded-md border border-[#2c2c2c] bg-[#171a1d]"
             >
               <Image
-                className="grayscale brightness-100 text-white"
+                className="text-white brightness-100 grayscale"
                 src={icon}
                 height={20}
                 width={20}
@@ -45,7 +45,7 @@ export default function CourseCard({ course }: Props) {
         {course.isAvailable ? (
           <div
             className={clsx(
-              "px-4 py-0.5 text-xs h-max rounded-full",
+              "h-max rounded-full px-4 py-0.5 text-xs",
               course.cost === 0 ? "bg-pink-500" : "bg-pink-500"
             )}
           >
@@ -59,7 +59,7 @@ export default function CourseCard({ course }: Props) {
         ) : (
           <div
             className={clsx(
-              "px-4 py-0.5 text-xs h-max rounded-full bg-indigo-500"
+              "h-max rounded-full bg-indigo-500 px-4 py-0.5 text-xs"
             )}
           >
             Hamarosan Érkezik
@@ -67,9 +67,9 @@ export default function CourseCard({ course }: Props) {
         )}
       </div>
       <div className="z-10">
-        <p className="font-semibold text-xl">{course.displayName}</p>
+        <p className="text-xl font-semibold">{course.displayName}</p>
         {course.description ? (
-          <p className="text-sm font-light mt-2">{course.shortDescription}</p>
+          <p className="mt-2 text-sm font-light">{course.shortDescription}</p>
         ) : null}
       </div>
     </div>

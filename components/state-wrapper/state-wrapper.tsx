@@ -42,12 +42,12 @@ export default function StateWrapper<T>({
           "flex w-full flex-1 flex-col items-center justify-center py-2"
         )}
       >
-        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-soft-green-light/10 text-5xl text-soft-green-light">
+        <span className="bg-soft-green-light/10 text-soft-green-light flex h-20 w-20 items-center justify-center rounded-full text-5xl">
           {icons?.error || <MdError />}
         </span>
         <p className="mt-3 text-xl font-bold">Something Went Wrong</p>
 
-        <p className="mt-0.5 max-w-xs text-center text-sm text-foreground-placeholder">
+        <p className="text-foreground-placeholder mt-0.5 max-w-xs text-center text-sm">
           {`It seems like we've encountered some error with loading the ${category}.`}
         </p>
       </div>
@@ -64,11 +64,11 @@ export default function StateWrapper<T>({
           "flex w-full flex-1 flex-col items-center justify-center py-2"
         )}
       >
-        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-soft-green-light/10 text-5xl text-soft-green-light">
+        <span className="bg-soft-green-light/10 text-soft-green-light flex h-20 w-20 items-center justify-center rounded-full text-5xl">
           {icons?.empty || <BsDatabaseFillExclamation />}
         </span>
         <p className="mt-3 text-xl font-bold">No Data</p>
-        <p className="mt-0.5 max-w-xs text-center text-sm text-foreground-placeholder">
+        <p className="text-foreground-placeholder mt-0.5 max-w-xs text-center text-sm">
           {`It seems like currently we don't have ${category} to load.`}
         </p>
       </div>

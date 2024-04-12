@@ -10,6 +10,7 @@ import Layout from "@/components/layout/layout"
 import StateWrapper from "@/components/state-wrapper/state-wrapper"
 import { COURSE_CLASSES_BY_ID_CACHE, CURRENT_USER_CACHE } from "@/constants/swr"
 import { immutableOptions } from "@/constants/swr.options"
+import UseCurrentUser from "@/hooks/useCurrentUser"
 import errorHandler from "@/services/error-handler"
 import { req } from "@/services/req"
 
@@ -30,13 +31,7 @@ export default function CourseView() {
     { ...immutableOptions, isPaused: () => !id }
   )
 
-  const { data: userData, isLoading: userIsLoading } = useSWR(
-    CURRENT_USER_CACHE,
-    async () => {
-      return await req.getCurrentUser()
-    },
-    { ...immutableOptions }
-  )
+  const { currentUser, isLoading: userIsLoading } = UseCurrentUser()
 
   const [selectedClass, setSelectedClass] = useState(data?.classes[0])
 
@@ -47,10 +42,15 @@ export default function CourseView() {
   }, [id])
 
   useEffect(() => {
-    if (data) {
-      setSelectedClass(data?.classes[0])
+    if (data && currentUser) {
+      setSelectedClass(
+        data.classes.filter(
+          (courseClass) =>
+            !currentUser.completedClassIds.includes(courseClass.id)
+        )[0] || data.classes[0]
+      )
     }
-  }, [data])
+  }, [data, currentUser])
 
   console.log(selectedClass)
 
@@ -70,10 +70,10 @@ export default function CourseView() {
                 {data.iconUrls.map((icon) => (
                   <div
                     key={icon}
-                    className="border border-[#2c2c2c] aspect-square w-10 flex justify-center items-center rounded-md bg-[#171a1d] z-10"
+                    className="z-10 flex aspect-square w-10 items-center justify-center rounded-md border border-[#2c2c2c] bg-[#171a1d]"
                   >
                     <Image
-                      className="grayscale brightness-100 text-white"
+                      className="text-white brightness-100 grayscale"
                       src={icon}
                       height={26}
                       width={26}
@@ -81,30 +81,33 @@ export default function CourseView() {
                     />
                   </div>
                 ))}
-                <p className="font-semibold text-3xl md:text-3xl z-10">
+                <p className="z-10 text-3xl font-semibold md:text-3xl">
                   {data.displayName}
                 </p>
               </div>
-              <p className="font-light mt-4 opacity-80">{data.description}</p>
+              <p className="mt-4 font-light opacity-80">{data.description}</p>
             </div>
-            <div className="flex flex-col md:flex-row mt-6 gap-y-6 gap-x-2">
-              <div className="relative flex flex-col gap-y-6 w-full md:w-52">
-                <div className="absolute left-4 w-px bg-[#2c2c2c] min-h-full"></div>
+            <div className="mt-6 flex flex-col gap-x-2 gap-y-6 md:flex-row">
+              <div className="relative flex w-full flex-col gap-y-6 md:w-52">
+                <div className="absolute left-4 min-h-full w-px bg-[#2c2c2c]"></div>
                 {data.classes.map((courseClass) => (
                   <>
                     <div className="flex items-center gap-x-3">
-                      {userData &&
-                      userData.completedClassIds.includes(courseClass.id) ? (
-                        <div className="h-8 w-8 flex items-center justify-center aspect-square border border-[#2c2c2c] rounded-full bg-pink-500 z-10 ">
-                          <FaCheck />
-                        </div>
-                      ) : (
-                        <div className="h-8 w-8 border border-[#2c2c2c] rounded-full bg-[#171a1d] z-10 aspect-square" />
-                      )}
+                      {currentUser ? (
+                        currentUser.completedClassIds.includes(
+                          courseClass.id
+                        ) ? (
+                          <div className="z-10 flex aspect-square h-8 w-8 items-center justify-center rounded-full border border-[#2c2c2c] bg-pink-500 ">
+                            <FaCheck />
+                          </div>
+                        ) : (
+                          <div className="z-10 aspect-square h-8 w-8 rounded-full border border-[#2c2c2c] bg-[#171a1d]" />
+                        )
+                      ) : null}
                       <p
                         onClick={() => setSelectedClass(courseClass)}
                         className={clsx(
-                          "hover:underline cursor-pointer",
+                          "cursor-pointer hover:underline",
                           selectedClass?.id === courseClass.id && "font-bold"
                         )}
                       >
@@ -115,14 +118,14 @@ export default function CourseView() {
                 ))}
               </div>
               <div className="w-full">
-                <div className="flex items-center justify-between mb-6 relative gap-x-4">
-                  <p className="font-bold text-2xl md:text-3xl">
+                <div className="relative mb-6 flex items-center justify-between gap-x-4">
+                  <p className="text-2xl font-bold md:text-3xl">
                     {selectedClass?.displayName}
                   </p>
                   <button
                     onClick={async () => {
                       if (
-                        userData?.completedClassIds.includes(
+                        currentUser?.completedClassIds.includes(
                           selectedClass?.id as string
                         )
                       ) {
@@ -137,22 +140,22 @@ export default function CourseView() {
                       await mutate(CURRENT_USER_CACHE)
                     }}
                     className={clsx(
-                      "text-sm flex-shrink-0 px-3 py-1.5  rounded-md flex items-center gap-x-1",
-                      userData?.completedClassIds.includes(
+                      "flex flex-shrink-0 items-center gap-x-1  rounded-md px-3 py-1.5 text-sm",
+                      currentUser?.completedClassIds.includes(
                         selectedClass?.id as string
                       )
                         ? "border border-[#2c2c2c]"
-                        : "hover:bg-pink-600 bg-pink-500"
+                        : "bg-pink-500 hover:bg-pink-600"
                     )}
                   >
-                    {userData?.completedClassIds.includes(
+                    {currentUser?.completedClassIds.includes(
                       selectedClass?.id as string
                     ) ? (
                       <FaX />
                     ) : (
                       <FaCheck />
                     )}
-                    {userData?.completedClassIds.includes(
+                    {currentUser?.completedClassIds.includes(
                       selectedClass?.id as string
                     )
                       ? "Mark as Incomplete"
@@ -160,7 +163,7 @@ export default function CourseView() {
                   </button>
                 </div>
                 <iframe
-                  className="w-full aspect-video"
+                  className="aspect-video w-full"
                   src={`https://www.youtube.com/embed/${selectedClass?.embedId}`}
                   title="YouTube video player"
                   frameBorder="0"

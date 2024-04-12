@@ -33,7 +33,7 @@ export default function Home() {
         category="users"
       >
         {({ data }) => (
-          <div className="h-full w-full grid md:grid-cols-3 gap-3">
+          <div className="grid h-full w-full gap-3 md:grid-cols-3">
             {data.map((course) => (
               <CourseCard key={course.id} course={course} />
             ))}
