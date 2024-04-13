@@ -1,7 +1,7 @@
 import clsx from "clsx"
 import Image from "next/image"
 import { useRouter } from "next/router"
-import React from "react"
+import React, { useMemo } from "react"
 import { MdClass } from "react-icons/md"
 
 import UseCurrentUser from "@/hooks/useCurrentUser"
@@ -14,6 +14,16 @@ interface Props {
 export default function CourseCard({ course }: Props) {
   const router = useRouter()
   const { currentUser } = UseCurrentUser()
+
+  const courseCompletion = useMemo(() => {
+    return (
+      (course.classIds.filter((classId) =>
+        currentUser?.completedClassIds.includes(classId)
+      ).length /
+        course.classIds.length) *
+      100
+    )
+  }, [course, currentUser])
 
   return (
     <div className="rounded-md border border-[#2c2c2c] bg-[#171a1d]">
@@ -63,12 +73,12 @@ export default function CourseCard({ course }: Props) {
                   <div
                     className="absolute h-full rounded-md bg-pink-500"
                     style={{
-                      width: `${(course.classIds.filter((classId) => currentUser.completedClassIds.includes(classId)).length / course.classIds.length) * 100}%`,
+                      width: `${courseCompletion}%`,
                     }}
                   ></div>
                 </div>
                 <div className="mt-1 text-xs">
-                  {`${(course.classIds.filter((classId) => currentUser.completedClassIds.includes(classId)).length / course.classIds.length) * 100}% Completed`}
+                  {`${courseCompletion}% Completed`}
                 </div>
               </div>
             ) : (

@@ -34,6 +34,12 @@ export default function CourseView() {
   const [selectedClass, setSelectedClass] = useState<CourseClass | null>(null)
 
   useEffect(() => {
+    if (router.isReady && id) {
+      mutate(COURSE_CLASSES_BY_ID_CACHE(id))
+    }
+  }, [id, router.isReady])
+
+  useEffect(() => {
     if (id && data) {
       setSelectedClass(
         data.classes.find(
@@ -54,11 +60,14 @@ export default function CourseView() {
     await mutate(CURRENT_USER_CACHE)
   }
 
+  const isCourseCompleted = useMemo(() => {
+    return currentUser?.completedClassIds.includes(selectedClass?.id as string)
+  }, [currentUser, selectedClass])
+
   const renderClasses = useMemo(() => {
     return data?.classes.map((courseClass) => (
       <div key={courseClass.id} className="flex items-center gap-x-3">
-        {currentUser &&
-        currentUser.completedClassIds.includes(courseClass.id) ? (
+        {currentUser && isCourseCompleted ? (
           <div className="z-10 flex aspect-square h-8 w-8 items-center justify-center rounded-full border border-[#2c2c2c] bg-pink-500 ">
             <FaCheck />
           </div>
@@ -76,7 +85,7 @@ export default function CourseView() {
         </p>
       </div>
     ))
-  }, [data, currentUser, selectedClass])
+  }, [data, currentUser, selectedClass, isCourseCompleted])
 
   return (
     <Layout>
@@ -108,7 +117,7 @@ export default function CourseView() {
                   )}
                 </div>
               </div>
-              <p className="mt-1 font-light opacity-80">{data.description}</p>
+              <p className="mt-2 font-light opacity-80">{data.description}</p>
             </div>
             {selectedClass !== undefined && selectedClass !== null ? (
               <div className="mt-6 flex flex-col gap-x-2 gap-y-6 md:flex-row">
@@ -129,51 +138,40 @@ export default function CourseView() {
                       }
                     }}
                   />
-                  <div className="relative mt-6 flex items-center justify-between gap-x-4">
-                    <p className="text-2xl font-bold md:text-3xl">
-                      <span className="text-pink-500">
-                        {`${data.classIds.indexOf(selectedClass?.id || "") + 1}. `}
-                      </span>
-                      {selectedClass?.displayName}
-                    </p>
-                    <button
-                      onClick={async () => {
-                        if (
-                          currentUser?.completedClassIds.includes(
-                            selectedClass?.id as string
-                          )
-                        ) {
-                          await handleIncompleteClass(
-                            selectedClass?.id as string
-                          )
-                        } else {
-                          await handleCompleteClass(selectedClass?.id as string)
-                        }
-                      }}
-                      className={clsx(
-                        "flex flex-shrink-0 items-center gap-x-1 rounded-md px-3 py-1.5 text-sm",
-                        currentUser?.completedClassIds.includes(
-                          selectedClass?.id as string
-                        )
-                          ? "border border-[#2c2c2c]"
-                          : "bg-pink-500 hover:bg-pink-600"
-                      )}
-                    >
-                      {currentUser?.completedClassIds.includes(
-                        selectedClass?.id as string
-                      ) ? (
-                        <FaX />
-                      ) : (
-                        <FaCheck />
-                      )}
-                      {currentUser?.completedClassIds.includes(
-                        selectedClass?.id as string
-                      )
-                        ? "Mark as Incomplete"
-                        : "Mark as Complete"}
-                    </button>
+                  <div className="mt-6 rounded-md border border-[#2c2c2c] p-5 ">
+                    <div className="relative  flex items-center justify-between gap-x-4">
+                      <p className="text-xl font-semibold md:text-2xl">
+                        {selectedClass?.displayName}
+                      </p>
+                      <button
+                        onClick={async () => {
+                          if (isCourseCompleted) {
+                            await handleIncompleteClass(
+                              selectedClass?.id as string
+                            )
+                          } else {
+                            await handleCompleteClass(
+                              selectedClass?.id as string
+                            )
+                          }
+                        }}
+                        className={clsx(
+                          "flex flex-shrink-0 items-center gap-x-1 rounded-md px-3 py-1.5 text-sm",
+                          isCourseCompleted
+                            ? "border border-[#2c2c2c]"
+                            : "bg-pink-500 hover:bg-pink-600"
+                        )}
+                      >
+                        {isCourseCompleted ? <FaX /> : <FaCheck />}
+                        {isCourseCompleted
+                          ? "Mark as Incomplete"
+                          : "Mark as Complete"}
+                      </button>
+                    </div>
+                    <div className="mt-4 text-sm opacity-80">
+                      {selectedClass?.description}
+                    </div>
                   </div>
-                  <div className="mt-6">{selectedClass?.description}</div>
                 </div>
               </div>
             ) : (

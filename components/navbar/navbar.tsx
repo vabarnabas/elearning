@@ -14,7 +14,7 @@ export default function Navbar() {
   const { currentUser } = UseCurrentUser()
 
   return (
-    <div className="fixed inset-x-0 flex h-16 justify-center">
+    <div className="fixed inset-x-0 z-20 flex h-16 justify-center bg-inherit">
       <div className="flex h-full w-full max-w-[1280px] items-center justify-between px-6">
         <div className="flex cursor-pointer items-center gap-x-4">
           <p
