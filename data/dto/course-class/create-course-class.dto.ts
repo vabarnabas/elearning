@@ -2,5 +2,7 @@ export type CreateCourseClassDto = {
   slug: string
   displayName: string
   description?: string
-  embedId: string
+  type?: string
+  url: string
+  categories: string[]
 }

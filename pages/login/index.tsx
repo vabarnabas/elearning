@@ -64,7 +64,7 @@ export default function Login() {
                 className="flex w-full items-center justify-center rounded-md border border-[#2c2c2c] bg-transparent px-3 py-1.5 outline-none"
               />
             </div>
-            <button className="w-full rounded-md bg-pink-500 px-3 py-1.5 font-semibold text-white hover:bg-pink-600">
+            <button className="w-full rounded-md bg-pink-500 px-3 py-1.5 text-white hover:bg-pink-600">
               Login
             </button>
             <button className="cursor-pointer text-center text-pink-500 hover:text-pink-600">

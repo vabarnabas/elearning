@@ -19,7 +19,7 @@ export default function Layout({ children, disableNavbar }: Props) {
       {!disableNavbar ? <Navbar /> : null}
       <div
         className={clsx(
-          "flex w-full max-w-[1280px] flex-col px-6",
+          "flex h-full w-full max-w-[1280px] flex-col px-6",
           !disableNavbar ? "pt-20" : "min-h-screen"
         )}
       >

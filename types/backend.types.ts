@@ -13,14 +13,14 @@ export type User = {
 export type Course = {
   id: string
   slug: string
-  creatorId: string
   displayName: string
   description: string
   shortDescription: string
   cost: number
   isAvailable: boolean
   imageUrl: string
-  iconUrls: string[]
+  creatorId: string
+  categories: string[]
   classIds: string[]
 }
 
@@ -34,5 +34,7 @@ export type CourseClass = {
   slug: string
   displayName: string
   description?: string
-  embedId: string
+  type?: string
+  url: string
+  categories: string[]
 }

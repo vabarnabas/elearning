@@ -1,18 +1,21 @@
 import clsx from "clsx"
-import Image from "next/image"
 import { useRouter } from "next/router"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { FaCheck, FaUserSlash, FaUserTimes } from "react-icons/fa"
 import { FaX } from "react-icons/fa6"
+import { LuConstruction } from "react-icons/lu"
+import { MdClass, MdEdit } from "react-icons/md"
+import ReactPlayer from "react-player"
 import useSWR, { mutate } from "swr"
 
 import Layout from "@/components/layout/layout"
 import StateWrapper from "@/components/state-wrapper/state-wrapper"
 import { COURSE_CLASSES_BY_ID_CACHE, CURRENT_USER_CACHE } from "@/constants/swr"
 import { immutableOptions } from "@/constants/swr.options"
-import UseCurrentUser from "@/hooks/useCurrentUser"
+import useCurrentUser from "@/hooks/useCurrentUser"
 import errorHandler from "@/services/error-handler"
 import { req } from "@/services/req"
+import { CourseClass } from "@/types/backend.types"
 
 export default function CourseView() {
   const router = useRouter()
@@ -21,38 +24,59 @@ export default function CourseView() {
   const { data, isValidating, error } = useSWR(
     COURSE_CLASSES_BY_ID_CACHE(id),
     async () => {
-      return await errorHandler(
-        async () => {
-          return await req.getCourseById(id)
-        }
-        // { onError: () => createToast(BASIC_ERROR_TOAST) }
-      )
+      return await errorHandler(() => req.getCourseById(id))
     },
     { ...immutableOptions, isPaused: () => !id }
   )
 
-  const { currentUser, isLoading: userIsLoading } = UseCurrentUser()
+  const { currentUser, isLoading: userIsLoading } = useCurrentUser()
 
-  const [selectedClass, setSelectedClass] = useState(data?.classes[0])
-
-  useEffect(() => {
-    if (id) {
-      mutate(COURSE_CLASSES_BY_ID_CACHE(id))
-    }
-  }, [id])
+  const [selectedClass, setSelectedClass] = useState<CourseClass | null>(null)
 
   useEffect(() => {
-    if (data && currentUser) {
+    if (id && data) {
       setSelectedClass(
-        data.classes.filter(
+        data.classes.find(
           (courseClass) =>
-            !currentUser.completedClassIds.includes(courseClass.id)
-        )[0] || data.classes[0]
+            !currentUser?.completedClassIds.includes(courseClass.id)
+        ) || data.classes[0]
       )
     }
-  }, [data, currentUser])
+  }, [id, data, currentUser])
 
-  console.log(selectedClass)
+  const handleCompleteClass = async (classId: string) => {
+    await req.completeCourseClass(classId)
+    await mutate(CURRENT_USER_CACHE)
+  }
+
+  const handleIncompleteClass = async (classId: string) => {
+    await req.incompleteCourseClass(classId)
+    await mutate(CURRENT_USER_CACHE)
+  }
+
+  const renderClasses = useMemo(() => {
+    return data?.classes.map((courseClass) => (
+      <div key={courseClass.id} className="flex items-center gap-x-3">
+        {currentUser &&
+        currentUser.completedClassIds.includes(courseClass.id) ? (
+          <div className="z-10 flex aspect-square h-8 w-8 items-center justify-center rounded-full border border-[#2c2c2c] bg-pink-500 ">
+            <FaCheck />
+          </div>
+        ) : (
+          <div className="z-10 aspect-square h-8 w-8 rounded-full border border-[#2c2c2c] bg-[#171a1d]" />
+        )}
+        <p
+          onClick={() => setSelectedClass(courseClass)}
+          className={clsx(
+            "cursor-pointer hover:underline",
+            selectedClass?.id === courseClass.id && "font-bold"
+          )}
+        >
+          {courseClass.displayName}
+        </p>
+      </div>
+    ))
+  }, [data, currentUser, selectedClass])
 
   return (
     <Layout>
@@ -66,114 +90,109 @@ export default function CourseView() {
         {({ data }) => (
           <>
             <div className="">
-              <div className="relative flex items-center justify-start gap-x-4">
-                {data.iconUrls.map((icon) => (
-                  <div
-                    key={icon}
-                    className="z-10 flex aspect-square w-10 items-center justify-center rounded-md border border-[#2c2c2c] bg-[#171a1d]"
-                  >
-                    <Image
-                      className="text-white brightness-100 grayscale"
-                      src={icon}
-                      height={26}
-                      width={26}
-                      alt={icon}
-                    />
-                  </div>
-                ))}
-                <p className="z-10 text-3xl font-semibold md:text-3xl">
-                  {data.displayName}
-                </p>
-              </div>
-              <p className="mt-4 font-light opacity-80">{data.description}</p>
-            </div>
-            <div className="mt-6 flex flex-col gap-x-2 gap-y-6 md:flex-row">
-              <div className="relative flex w-full flex-col gap-y-6 md:w-52">
-                <div className="absolute left-4 min-h-full w-px bg-[#2c2c2c]"></div>
-                {data.classes.map((courseClass) => (
-                  <>
-                    <div className="flex items-center gap-x-3">
-                      {currentUser ? (
-                        currentUser.completedClassIds.includes(
-                          courseClass.id
-                        ) ? (
-                          <div className="z-10 flex aspect-square h-8 w-8 items-center justify-center rounded-full border border-[#2c2c2c] bg-pink-500 ">
-                            <FaCheck />
-                          </div>
-                        ) : (
-                          <div className="z-10 aspect-square h-8 w-8 rounded-full border border-[#2c2c2c] bg-[#171a1d]" />
-                        )
-                      ) : null}
-                      <p
-                        onClick={() => setSelectedClass(courseClass)}
-                        className={clsx(
-                          "cursor-pointer hover:underline",
-                          selectedClass?.id === courseClass.id && "font-bold"
-                        )}
-                      >
-                        {courseClass.displayName}
-                      </p>
-                    </div>
-                  </>
-                ))}
-              </div>
-              <div className="w-full">
-                <div className="relative mb-6 flex items-center justify-between gap-x-4">
-                  <p className="text-2xl font-bold md:text-3xl">
-                    {selectedClass?.displayName}
+              <div className="flex justify-between">
+                <div className="relative flex items-center justify-start gap-x-4">
+                  <p className="z-10 flex w-full items-center text-3xl font-semibold md:text-3xl">
+                    {data.displayName}
                   </p>
-                  <button
-                    onClick={async () => {
-                      if (
+                  <p className="flex w-max flex-shrink-0 items-center gap-x-1 rounded-md bg-pink-500/10 px-2 py-0.5 text-xs text-pink-500">
+                    <MdClass />
+                    {`${data.classIds.length} ${data.classIds.length > 1 ? "Classes" : "Class"}`}
+                  </p>
+                </div>
+                <div className="">
+                  {currentUser?.isAdministrator && (
+                    <button className="rounded-md bg-pink-500 px-3 py-1.5 text-sm text-white hover:bg-pink-600">
+                      <MdEdit />
+                    </button>
+                  )}
+                </div>
+              </div>
+              <p className="mt-1 font-light opacity-80">{data.description}</p>
+            </div>
+            {selectedClass !== undefined && selectedClass !== null ? (
+              <div className="mt-6 flex flex-col gap-x-2 gap-y-6 md:flex-row">
+                <div className="relative flex w-full flex-col gap-y-6 md:w-56">
+                  <div className="absolute left-4 min-h-full w-px bg-[#2c2c2c]"></div>
+                  {renderClasses}
+                </div>
+                <div className="w-full">
+                  <ReactPlayer
+                    style={{ aspectRatio: "16/9 auto" }}
+                    width="100%"
+                    height="auto"
+                    controls
+                    url={selectedClass?.url}
+                    onProgress={async (progress) => {
+                      if (progress.played >= 0.99) {
+                        await handleCompleteClass(selectedClass?.id as string)
+                      }
+                    }}
+                  />
+                  <div className="relative mt-6 flex items-center justify-between gap-x-4">
+                    <p className="text-2xl font-bold md:text-3xl">
+                      <span className="text-pink-500">
+                        {`${data.classIds.indexOf(selectedClass?.id || "") + 1}. `}
+                      </span>
+                      {selectedClass?.displayName}
+                    </p>
+                    <button
+                      onClick={async () => {
+                        if (
+                          currentUser?.completedClassIds.includes(
+                            selectedClass?.id as string
+                          )
+                        ) {
+                          await handleIncompleteClass(
+                            selectedClass?.id as string
+                          )
+                        } else {
+                          await handleCompleteClass(selectedClass?.id as string)
+                        }
+                      }}
+                      className={clsx(
+                        "flex flex-shrink-0 items-center gap-x-1 rounded-md px-3 py-1.5 text-sm",
                         currentUser?.completedClassIds.includes(
                           selectedClass?.id as string
                         )
-                      ) {
-                        await req.incompleteCourseClass(
-                          selectedClass?.id as string
-                        )
-                      } else {
-                        await req.completeCourseClass(
-                          selectedClass?.id as string
-                        )
-                      }
-                      await mutate(CURRENT_USER_CACHE)
-                    }}
-                    className={clsx(
-                      "flex flex-shrink-0 items-center gap-x-1  rounded-md px-3 py-1.5 text-sm",
-                      currentUser?.completedClassIds.includes(
+                          ? "border border-[#2c2c2c]"
+                          : "bg-pink-500 hover:bg-pink-600"
+                      )}
+                    >
+                      {currentUser?.completedClassIds.includes(
+                        selectedClass?.id as string
+                      ) ? (
+                        <FaX />
+                      ) : (
+                        <FaCheck />
+                      )}
+                      {currentUser?.completedClassIds.includes(
                         selectedClass?.id as string
                       )
-                        ? "border border-[#2c2c2c]"
-                        : "bg-pink-500 hover:bg-pink-600"
-                    )}
-                  >
-                    {currentUser?.completedClassIds.includes(
-                      selectedClass?.id as string
-                    ) ? (
-                      <FaX />
-                    ) : (
-                      <FaCheck />
-                    )}
-                    {currentUser?.completedClassIds.includes(
-                      selectedClass?.id as string
-                    )
-                      ? "Mark as Incomplete"
-                      : "Mark as Complete"}
-                  </button>
+                        ? "Mark as Incomplete"
+                        : "Mark as Complete"}
+                    </button>
+                  </div>
+                  <div className="mt-6">{selectedClass?.description}</div>
                 </div>
-                <iframe
-                  className="aspect-video w-full"
-                  src={`https://www.youtube.com/embed/${selectedClass?.embedId}`}
-                  title="YouTube video player"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                />
-                <div className="mt-6">{selectedClass?.description}</div>
               </div>
-            </div>
+            ) : (
+              <div className="mt-6 flex h-full flex-grow items-center justify-center">
+                <div
+                  className={clsx(
+                    "flex w-full flex-1 flex-col items-center justify-center py-2"
+                  )}
+                >
+                  <span className="flex h-20 w-20 items-center justify-center rounded-full bg-pink-500/10 text-5xl text-pink-500">
+                    <LuConstruction />
+                  </span>
+                  <p className="mt-3 text-xl font-bold">Under Construction</p>
+                  <p className="text-foreground-placeholder mt-0.5 max-w-xs text-center text-sm">
+                    It seems like this course is still under construction
+                  </p>
+                </div>
+              </div>
+            )}
           </>
         )}
       </StateWrapper>
