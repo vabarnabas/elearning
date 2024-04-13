@@ -26,11 +26,11 @@ export default function CourseCard({ course }: Props) {
   }, [course, currentUser])
 
   return (
-    <div className="rounded-md border border-[#2c2c2c] bg-[#171a1d]">
+    <div className="h-48 rounded-md border border-[#2c2c2c] bg-[#171a1d]">
       <div
         key={course.id}
         onClick={() => router.push(`courses/${course.id}`)}
-        className="relative flex h-48 cursor-pointer flex-col justify-between rounded-t-md border-[#2c2c2c] p-3"
+        className="relative flex h-full cursor-pointer flex-col justify-between rounded-t-md border-[#2c2c2c] p-3"
       >
         <Image
           className="rounded-md opacity-30"
