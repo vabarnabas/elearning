@@ -3,7 +3,7 @@ import React from "react"
 import { FaCrown } from "react-icons/fa"
 import { MdSchool } from "react-icons/md"
 
-import UseCurrentUser from "@/hooks/useCurrentUser"
+import useCurrentUser from "@/hooks/useCurrentUser"
 import { req } from "@/services/req"
 
 import Avatar from "../avatar/avatar"
@@ -11,7 +11,7 @@ import Avatar from "../avatar/avatar"
 export default function Navbar() {
   const router = useRouter()
 
-  const { currentUser } = UseCurrentUser()
+  const { currentUser } = useCurrentUser()
 
   return (
     <div className="fixed inset-x-0 z-20 flex h-16 justify-center bg-inherit">

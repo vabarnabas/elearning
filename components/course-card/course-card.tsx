@@ -4,7 +4,7 @@ import { useRouter } from "next/router"
 import React, { useMemo } from "react"
 import { MdClass } from "react-icons/md"
 
-import UseCurrentUser from "@/hooks/useCurrentUser"
+import useCurrentUser from "@/hooks/useCurrentUser"
 import { Course } from "@/types/backend.types"
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 
 export default function CourseCard({ course }: Props) {
   const router = useRouter()
-  const { currentUser } = UseCurrentUser()
+  const { currentUser } = useCurrentUser()
 
   const courseCompletion = useMemo(() => {
     return (
@@ -30,7 +30,7 @@ export default function CourseCard({ course }: Props) {
       <div
         key={course.id}
         onClick={() => router.push(`courses/${course.id}`)}
-        className="relative flex h-full cursor-pointer flex-col justify-between rounded-t-md border-[#2c2c2c] p-3"
+        className="relative flex h-full cursor-pointer flex-col justify-between rounded-t-md border-[#2c2c2c] p-2"
       >
         <Image
           className="rounded-md opacity-30"
@@ -40,7 +40,7 @@ export default function CourseCard({ course }: Props) {
           alt="asd"
         />
         <div className="z-10 flex w-full items-center justify-between">
-          <div className="font-semibold">{course.displayName}</div>
+          <div className="text-lg font-semibold">{course.displayName}</div>
           {course.isAvailable ? (
             <div
               className={clsx(
@@ -85,7 +85,7 @@ export default function CourseCard({ course }: Props) {
               <p className="text-xs">Not Started</p>
             )}
           </div>
-          <p className="flex w-max items-center gap-x-1 rounded-md bg-pink-500/10 px-2 py-0.5 text-xs text-pink-500">
+          <p className="flex w-max items-center gap-x-1 rounded-md bg-pink-500/10 px-2 py-1 text-xs text-pink-500">
             <MdClass />
             {`${course.classIds.length} ${course.classIds.length > 1 ? "Classes" : "Class"}`}
           </p>

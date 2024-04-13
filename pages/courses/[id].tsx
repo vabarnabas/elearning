@@ -10,7 +10,7 @@ import useSWR, { mutate } from "swr"
 
 import Layout from "@/components/layout/layout"
 import StateWrapper from "@/components/state-wrapper/state-wrapper"
-import { COURSE_CLASSES_BY_ID_CACHE, CURRENT_USER_CACHE } from "@/constants/swr"
+import { COURSE_BY_ID_CACHE, CURRENT_USER_CACHE } from "@/constants/swr"
 import { immutableOptions } from "@/constants/swr.options"
 import useCurrentUser from "@/hooks/useCurrentUser"
 import errorHandler from "@/services/error-handler"
@@ -22,7 +22,7 @@ export default function CourseView() {
   const id = router.query.id as string
 
   const { data, isValidating, error } = useSWR(
-    COURSE_CLASSES_BY_ID_CACHE(id),
+    COURSE_BY_ID_CACHE(id),
     async () => {
       return await errorHandler(() => req.getCourseById(id))
     },
@@ -35,7 +35,7 @@ export default function CourseView() {
 
   useEffect(() => {
     if (router.isReady && id) {
-      mutate(COURSE_CLASSES_BY_ID_CACHE(id))
+      mutate(COURSE_BY_ID_CACHE(id))
     }
   }, [id, router.isReady])
 
@@ -111,7 +111,10 @@ export default function CourseView() {
                 </div>
                 <div className="">
                   {currentUser?.isAdministrator && (
-                    <button className="rounded-md bg-pink-500 px-3 py-1.5 text-sm text-white hover:bg-pink-600">
+                    <button
+                      onClick={() => router.push(`/courses/edit/${id}`)}
+                      className="rounded-md bg-pink-500 px-3 py-1.5 text-sm text-white hover:bg-pink-600"
+                    >
                       <MdEdit />
                     </button>
                   )}

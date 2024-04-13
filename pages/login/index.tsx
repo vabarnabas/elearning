@@ -24,7 +24,6 @@ export default function Login() {
 
   const onSubmit = handleSubmit(async (data) => {
     setIsLoading(true)
-    console.log(data)
     await errorHandler(
       async () => {
         const { access_token } = await req.login(data.identifier, data.password)

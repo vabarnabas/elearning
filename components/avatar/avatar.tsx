@@ -1,7 +1,7 @@
 import clsx from "clsx"
 import React from "react"
 
-import UseCurrentUser from "@/hooks/useCurrentUser"
+import useCurrentUser from "@/hooks/useCurrentUser"
 
 import Spinner from "../spinner/spinner"
 
@@ -20,7 +20,7 @@ interface Props {
 }
 
 export default function Avatar({ invert, disabled, noTooltip, size }: Props) {
-  const { currentUser, isLoading } = UseCurrentUser()
+  const { currentUser, isLoading } = useCurrentUser()
 
   function getInitials(displayName: string) {
     const nameArray = displayName.split(" ")
